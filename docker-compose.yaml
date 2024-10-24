@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: student
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    networks:
+      - backend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8091:8080"
+    networks:
+      - backend
+
+  api:
+    build: ./api
+    restart: always
+    depends_on:
+      - database
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - ./api:/app
+    ports:
+      - "8080:8080"
+
+  web-app:
+    build: ./web-app
+    restart: always
+    depends_on:
+      - api
+      - database
+    networks:
+      - frontend
+    ports:
+      - "8090:5000"
+
+networks:
+  backend:
+  frontend:
+
+volumes:
+  postgres_data:
